@@ -1,0 +1,155 @@
+﻿<Window x:Class="CowinWatcher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:watcher="clr-namespace:CowinWatcher"
+        mc:Ignorable="d"
+        Title="Cowin Watcher" Height="620">
+    <Window.Resources>
+        <DataTemplate x:Key="SessionInfo" >
+            <ListView  ItemsSource="{Binding}" HorizontalContentAlignment="Center" HorizontalAlignment="Center">
+                <ListView.ItemTemplate>
+                    
+                    <DataTemplate>
+                        <StackPanel Name="BGBackground" MinWidth="100" Margin="0" Orientation="Horizontal" TextBlock.FontWeight="Bold" TextBlock.Foreground="White" HorizontalAlignment="Center"  >
+                            <StackPanel Width="80" Margin="10,0">
+                                <TextBlock  Text="{Binding vaccine}"  />
+                                <!--<TextBlock Grid.Row="1" Text="{Binding available_capacity, StringFormat= 'Qty: \{0\}'}"/>-->
+                                <TextBlock   Text="{Binding available_capacity_dose1, StringFormat= 'Dose 1 : \{0\}'}" />
+                                <TextBlock  Text="{Binding available_capacity_dose2, StringFormat= 'Dose 2 : \{0\}'}" />
+
+                            </StackPanel>
+                            <Line X1="0" X2="0" Y1="0" Y2="50" Stroke="White" StrokeThickness="0.5" />
+                            <Grid VerticalAlignment="Center" Margin="4" Width="Auto" >
+                                <TextBlock Text="{Binding min_age_limit, StringFormat= '\{0\}+'}" />
+                            </Grid>
+                        </StackPanel>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Path=IsAvailable}" Value="False">
+                                <Setter Property="Grid.Background" TargetName="BGBackground" Value="Red"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=IsAvailable}" Value="True">
+                                <Setter Property="Grid.Background" TargetName="BGBackground" Value="Green"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=min_age_limit}" Value="0">
+                                <Setter Property="Visibility" TargetName="BGBackground" Value="Hidden"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </DataTemplate>
+
+        <Style TargetType="ComboBox" x:Key="MyCombo" >
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Margin" Value="0,10,0,20"/>
+            <Setter Property="SelectedIndex" Value="0"/>
+            <Setter Property="BorderBrush" Value="SteelBlue" />
+            <Setter Property="BorderThickness" Value="3" />
+        </Style>
+    </Window.Resources>
+    <Grid HorizontalAlignment="Stretch">
+        <StackPanel  Margin="10">
+            <StackPanel Orientation="Horizontal" Background="AliceBlue">
+                <Label Content="Vaccine Slot Watcher" HorizontalAlignment="Center" FontSize="20" FontWeight="Bold" Margin="400,10,250,0"/>
+                <StackPanel  HorizontalAlignment="Center" >
+                    <Label Content="Refresh In." FontSize="12" FontWeight="Bold" />
+                    <TextBlock Text="{Binding RefreshTimer, StringFormat= '\{0\} seconds'}" FontSize="16" FontWeight="Bold"  Foreground="Red"/>
+                </StackPanel>
+               
+            </StackPanel>
+          
+            <StackPanel Orientation="Horizontal" Margin="10">
+                <StackPanel  Margin="10" Width="200" >
+                    <ComboBox ItemsSource="{Binding StatesInfo.states,Mode=TwoWay}"   DisplayMemberPath="state_name" SelectedItem="{Binding StateSelected,Mode=TwoWay}" SelectedValuePath="state_id"  Style="{StaticResource MyCombo}">
+
+                    </ComboBox>
+                    <ComboBox ItemsSource="{Binding DistrictsInfo.districts,Mode=TwoWay}" DisplayMemberPath="district_name" SelectedItem="{Binding DistrictSelected,Mode=TwoWay}" SelectedValuePath="district_id"  Style="{StaticResource MyCombo}" SelectedIndex="0">
+                    </ComboBox>
+                </StackPanel >
+                <StackPanel Orientation="Horizontal">
+                    <ListView Name="lvVaccine" Margin="10"  ItemsSource="{Binding SlotLists}" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="484" BorderBrush="SteelBlue" BorderThickness="2" >
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListViewItem}">
+                                <Setter Property="BorderBrush" Value="SteelBlue" />
+                                <Setter Property="BorderThickness" Value="0,0,0,5" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.View >
+                            <GridView >
+                                <GridViewColumn Header="Name" Width="250" >
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate >
+                                            <StackPanel >
+                                                <Grid  Name="BGBackground"  MinHeight="40">
+                                                    <StackPanel HorizontalAlignment="Center" TextBlock.FontWeight="Bold" TextBlock.Foreground="Black">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding CenterDetail.name}"  />
+                                                            <Grid Name="BGFeeType"  Margin="5,0" >
+                                                                <TextBlock Foreground="WhiteSmoke" Margin="10,2"  VerticalAlignment="Center" Text="{Binding CenterDetail.fee_type}"/>
+                                                            </Grid>
+
+                                                        </StackPanel>
+                                                        <TextBlock  FontWeight="Normal"  TextWrapping="Wrap">
+            <Run Text="{Binding CenterDetail.address}"/>
+            <Run Text="{Binding CenterDetail.block_name}"/>
+            <Run Text="{Binding CenterDetail.pincode}"/>
+
+                                                        </TextBlock >
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Path=CenterDetail.fee_type}" Value="Free">
+                                                    <Setter Property="Grid.Background" TargetName="BGFeeType" Value="Green"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Path=CenterDetail.fee_type}" Value="Paid">
+                                                    <Setter Property="Grid.Background" TargetName="BGFeeType" Value="RoyalBlue"/>
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="160"  >
+                                    <GridViewColumn.HeaderTemplate>
+                                        <DataTemplate>
+
+                                            <TextBlock Text="{Binding DataContext.SessionDates[0], RelativeSource={RelativeSource AncestorType={x:Type ListView}}}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.HeaderTemplate>
+                                    <GridViewColumn.CellTemplate >
+                                        <DataTemplate >
+                                            <ContentControl HorizontalAlignment="Center"
+        Content="{Binding SessionDay1}"
+        ContentTemplate="{StaticResource SessionInfo}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="160" >
+                                    <GridViewColumn.HeaderTemplate>
+                                        <DataTemplate>
+
+                                            <TextBlock Text="{Binding DataContext.SessionDates[1], RelativeSource={RelativeSource AncestorType={x:Type ListView}}}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.HeaderTemplate>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate >
+                                            <ContentControl
+        Content="{Binding SessionDay2}"
+        ContentTemplate="{StaticResource SessionInfo}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
